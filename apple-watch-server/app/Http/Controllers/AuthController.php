@@ -9,16 +9,16 @@ use Illuminate\Support\Facades\Auth;
 class AuthController extends Controller
 {
     function login(Request $request){
-
-        $credentials=[
-            "email"=> $request["email"],
+        $credentials = [
+            "email" => $request["email"],
             "password" => $request["password"]
         ];
 
-        if (Auth::attempt($credentials)){
+        if (Auth::guard('web')->attempt($credentials)){
+            $user = Auth::guard('web')->user();
 
-            $user = Auth::user();
-            $token= $user->createToken('Personal Access Token')->accessToken;
+            $tokenResult = $user->createToken('Personal Access Token');
+            $token = $tokenResult->accessToken;
 
             return response()->json([
                 'success' => true,
@@ -26,12 +26,24 @@ class AuthController extends Controller
                 'user' => $user
             ]);
         }
-
         else {
-            return response()->json(['success' => false, 'error' => 'Unauthorized'], 401);
+            return response()->json([
+                'success' => false,
+                'error' => 'Unauthorized'
+            ]);
         }
+    }
 
+    function signup(Request $request){
+        $user = new User;
+        $user->full_name = $request["full_name"];
+        $user->email = $request["email"];
+        $user->password = bcrypt($request["password"]);
+        $user->save();
 
-
+        return response()->json([
+            "success" => true,
+            "user" => $user
+        ]);
     }
 }
