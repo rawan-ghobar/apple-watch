@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use App\Models\User;
 
 class CsvUploadController extends Controller
 {
@@ -24,7 +25,7 @@ class CsvUploadController extends Controller
 
         $filePath = $request->file('file')->store('csv_files');
 
-        $csv = fopen(storage_path('app/' . $filePath), 'r');
+        $csv = fopen(storage_path('app/private/' . $filePath), 'r');
 
         fgetcsv($csv);
 
@@ -32,7 +33,7 @@ class CsvUploadController extends Controller
 
         while (($row = fgetcsv($csv)) !== false) {
 
-            DB::table('your_table')->insert([
+            DB::table('activity_logs')->insert([
                 'user_id'        => $userId,
                 'date'           => $row[1],
                 'steps'          => $row[2],
